@@ -1,0 +1,13 @@
+name: "power-grid-optimizer"
+description: "Manages a mixed-source electrical grid to maintain 50Hz frequency."
+version: "1.0.0"
+api:
+  reset: "/reset"
+  step: "/step"
+tasks:
+  - id: "easy"
+    description: "The Sunny Day: predictable demand and high solar."
+  - id: "medium"
+    description: "Intermittent Clouds: fluctuating solar and spot prices."
+  - id: "hard"
+    description: "The Storm Surge: zero solar/wind, massive demand."
