@@ -28,3 +28,10 @@ async def step_env(action: Action):
         done=done,
         info=info
     )
+
+def start_server():
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=7860)
+
+if __name__ == "__main__":
+    start_server()
