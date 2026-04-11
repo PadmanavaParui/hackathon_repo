@@ -10,32 +10,31 @@ def make_post_request(url, data=None):
     req = urllib.request.Request(url, method="POST")
     req.add_header("Content-Type", "application/json")
     
-    # Convert dictionary to JSON bytes
     data_bytes = json.dumps(data).encode("utf-8") if data else b"{}"
     
     try:
         with urllib.request.urlopen(req, data=data_bytes) as response:
             return json.loads(response.read().decode("utf-8"))
     except Exception as e:
-        print(f"HTTP Request failed: {e}")
+        print(f"HTTP Request failed: {e}", flush=True)
         raise
 
 def run_baseline():
-    print(f"Starting baseline agent against {ENV_URL}...")
+    task_name = "easy"
+    # REQUIRED FORMAT: [START] task=NAME
+    print(f"[START] task={task_name}", flush=True)
     
-    # 1. Reset Environment
     try:
-        obs = make_post_request(f"{ENV_URL}/reset", {"task_id": "easy"})
-        print(f"Initial Observation: {obs}")
+        obs = make_post_request(f"{ENV_URL}/reset", {"task_id": task_name})
     except Exception as e:
-        print(f"Failed to reset environment: {e}")
+        print(f"Failed to reset environment: {e}", flush=True)
         return
 
     done = False
     step_count = 0
     max_steps = 24
+    total_reward = 0.0
 
-    # 2. Step Loop
     while not done and step_count < max_steps:
         step_count += 1
         
@@ -50,14 +49,21 @@ def run_baseline():
         try:
             data = make_post_request(f"{ENV_URL}/step", action)
             reward = data.get("reward", 0.0)
+            total_reward += reward
             done = data.get("done", True)
-            print(f"Step {step_count} | Reward: {reward} | Done: {done}")
+            
+            # REQUIRED FORMAT: [STEP] step=1 reward=0.5
+            print(f"[STEP] step={step_count} reward={reward}", flush=True)
             
         except Exception as e:
-            print(f"Step failed: {e}")
+            print(f"Step failed: {e}", flush=True)
             break
 
-    print("Baseline inference complete.")
+    # Calculate a dummy final score (0.0 to 1.0) based on reward
+    final_score = max(0.0, min(1.0, total_reward / max_steps))
+    
+    # REQUIRED FORMAT: [END] task=NAME score=0.95 steps=1
+    print(f"[END] task={task_name} score={final_score:.2f} steps={step_count}", flush=True)
 
 if __name__ == "__main__":
     run_baseline()
